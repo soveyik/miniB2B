@@ -1,0 +1,202 @@
+@model ProductListViewModel
+@{
+    ViewData["Title"] = "Ürün Listesi";
+}
+
+<!-- B2B Slider / Banner Area -->
+@if (Model.Sliders != null && Model.Sliders.Any())
+{
+    <div id="b2bCarousel" class="carousel slide mb-4" data-bs-ride="carousel">
+        <div class="carousel-inner rounded shadow-sm">
+            @{
+                bool isFirst = true;
+                foreach (var slider in Model.Sliders)
+                {
+                    <div class="carousel-item @(isFirst ? "active" : "")">
+                        @if (!string.IsNullOrEmpty(slider.LinkUrl))
+                        {
+                            <a href="@slider.LinkUrl">
+                                <img src="@slider.ImageUrl" class="d-block w-100" style="max-height:300px; object-fit:cover;" alt="@slider.Title">
+                            </a>
+                        }
+                        else
+                        {
+                            <img src="@slider.ImageUrl" class="d-block w-100" style="max-height:300px; object-fit:cover;" alt="@slider.Title">
+                        }
+                        
+                        @if (!string.IsNullOrEmpty(slider.Title) || !string.IsNullOrEmpty(slider.Description))
+                        {
+                            <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded">
+                                @if (!string.IsNullOrEmpty(slider.Title))
+                                {
+                                    <h5>@slider.Title</h5>
+                                }
+                                @if (!string.IsNullOrEmpty(slider.Description))
+                                {
+                                    <p>@slider.Description</p>
+                                }
+                            </div>
+                        }
+                    </div>
+                    isFirst = false;
+                }
+            }
+        </div>
+        
+        @if (Model.Sliders.Count > 1)
+        {
+            <button class="carousel-control-prev" type="button" data-bs-target="#b2bCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#b2bCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+        }
+    </div>
+}
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <h2>Hızlı Sipariş / Ürün Listesi</h2>
+    </div>
+    <div class="col-md-6">
+        <form method="get" class="d-flex">
+            <input type="text" name="searchTerm" class="form-control me-2" placeholder="Ürün kodu, adı veya marka ara..." value="@Model.SearchTerm" />
+            <button type="submit" class="btn btn-outline-primary">Ara</button>
+            <a asp-action="Index" class="btn btn-outline-secondary ms-2">Temizle</a>
+        </form>
+    </div>
+</div>
+
+<div class="table-responsive shadow-sm bg-white rounded p-3">
+    <table class="table table-hover align-middle">
+        <thead class="table-light">
+            <tr>
+                @foreach (var col in Model.GridConfigs)
+                {
+                    <th style="@(!string.IsNullOrEmpty(col.Width) ? $"width:{col.Width}" : "")">
+                        @col.HeaderText
+                    </th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @if (!Model.Products.Any())
+            {
+                <tr>
+                    <td colspan="@Model.GridConfigs.Count" class="text-center text-muted">Ürün bulunamadı.</td>
+                </tr>
+            }
+            @foreach (var p in Model.Products)
+            {
+                <tr>
+                    @foreach (var col in Model.GridConfigs)
+                    {
+                        <td>
+                            @if (col.RenderType == "Image")
+                            {
+                                <img src="@p.ImageUrl" alt="@p.ProductName" class="img-thumbnail" style="max-height:50px; cursor:pointer;" onclick="showProductDetail(@p.Id)" />
+                            }
+                            else if (col.RenderType == "Price")
+                            {
+                                <strong>@p.Price.ToString("C2")</strong>
+                            }
+                            else if (col.RenderType == "StockStatus")
+                            {
+                                @if (p.StockQuantity <= 0)
+                                {
+                                    <span class="badge bg-danger">Tükendi</span>
+                                }
+                                else if (p.StockQuantity <= p.CriticalStockLevel)
+                                {
+                                    <span class="badge bg-warning text-dark">Kritik Stok (@p.StockQuantity)</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success">Stokta Var</span>
+                                }
+                            }
+                            else if (col.RenderType == "Action")
+                            {
+                                <div class="input-group input-group-sm">
+                                    <input type="number" id="qty_@p.Id" class="form-control" value="1" min="1" max="@(p.StockQuantity > 0 ? p.StockQuantity : 1)" @(p.StockQuantity <= 0 ? "disabled" : "") />
+                                    <button class="btn btn-primary" onclick="addToCart(@p.Id)" @(p.StockQuantity <= 0 ? "disabled" : "")>
+                                        <i class="bi bi-cart-plus"></i>
+                                    </button>
+                                </div>
+                            }
+                            else
+                            {
+                                var value = p.GetType().GetProperty(col.PropertyName)?.GetValue(p, null);
+                                if (col.PropertyName == "ProductName")
+                                {
+                                    <a href="javascript:void(0)" onclick="showProductDetail(@p.Id)" class="text-decoration-none">@value</a>
+                                }
+                                else
+                                {
+                                    @value
+                                }
+                            }
+                        </td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="productDetailModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Ürün Detayı</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="productDetailModalBody">
+                <div class="text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Yükleniyor...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function showProductDetail(id) {
+            var modal = new bootstrap.Modal(document.getElementById('productDetailModal'));
+            modal.show();
+            
+            $.get('/Home/ProductDetail/' + id, function(data) {
+                $('#productDetailModalBody').html(data);
+            }).fail(function() {
+                $('#productDetailModalBody').html('<div class="alert alert-danger">Detaylar yüklenemedi.</div>');
+            });
+        }
+
+        function addToCart(id) {
+            var qty = $('#qty_' + id).val();
+            $.post('/Home/AddToCart', { productId: id, quantity: qty }, function(res) {
+                if(res.success) {
+                    var badge = $('#cartCountBadge');
+                    badge.text(res.cartCount);
+                    badge.show();
+                    
+                    var btn = $('#qty_' + id).next('button');
+                    var originalHtml = btn.html();
+                    btn.html('<i class="bi bi-check"></i>').removeClass('btn-primary').addClass('btn-success');
+                    setTimeout(function() {
+                        btn.html(originalHtml).removeClass('btn-success').addClass('btn-primary');
+                    }, 1000);
+                } else {
+                    alert(res.message);
+                }
+            });
+        }
+    </script>
+}

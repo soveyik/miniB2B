@@ -1,0 +1,44 @@
+@model MiniB2B.Entities.Product
+
+<div class="row">
+    <div class="col-md-5 text-center">
+        <img src="@Model.ImageUrl" alt="@Model.ProductName" class="img-fluid rounded" />
+    </div>
+    <div class="col-md-7">
+        <h4>@Model.ProductName</h4>
+        <hr />
+        <p><strong>Ürün Kodu:</strong> @Model.ProductCode</p>
+        <p><strong>Üretici Kodu:</strong> @(string.IsNullOrEmpty(Model.ManufacturerCode) ? "-" : Model.ManufacturerCode)</p>
+        <p><strong>Marka:</strong> @Model.Brand</p>
+        <p><strong>Kategori:</strong> @Model.Category?.Name</p>
+        @if (!string.IsNullOrEmpty(Model.SpecialCode1))
+        {
+            <p><strong>Özel Kod 1:</strong> @Model.SpecialCode1</p>
+        }
+        @if (!string.IsNullOrEmpty(Model.SpecialCode2))
+        {
+            <p><strong>Özel Kod 2:</strong> @Model.SpecialCode2</p>
+        }
+        
+        <p><strong>Fiyat:</strong> <span class="fs-5 text-primary">@Model.Price.ToString("C2")</span></p>
+        <p>
+            <strong>Stok Durumu:</strong>
+            @if (Model.StockQuantity <= 0)
+            {
+                <span class="badge bg-danger">Tükendi</span>
+            }
+            else
+            {
+                <span class="badge bg-success">@Model.StockQuantity Adet</span>
+            }
+        </p>
+        
+        <p class="mt-3">@Model.Description</p>
+        
+        <div class="mt-4 text-end">
+            <a href="/Home/Details/@Model.Id" class="btn btn-outline-primary btn-sm">
+                <i class="bi bi-box-arrow-up-right"></i> Tam Sayfa Detaya Git
+            </a>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,33 @@
+@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "_AdminLayout";
+}
+
+<h2>Admin Dashboard</h2>
+
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card text-white bg-primary mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Toplam Sipariş</h5>
+                <p class="card-text fs-2">@ViewBag.TotalOrders</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Toplam Ürün</h5>
+                <p class="card-text fs-2">@ViewBag.TotalProducts</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-secondary mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Toplam Kullanıcı</h5>
+                <p class="card-text fs-2">@ViewBag.TotalUsers</p>
+            </div>
+        </div>
+    </div>
+</div>

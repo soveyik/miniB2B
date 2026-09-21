@@ -1,0 +1,68 @@
+@model MiniB2B.Entities.Slider
+@{
+    ViewData["Title"] = "Yeni Slider Ekle";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm mt-4 border-0">
+            <div class="card-header bg-primary text-white border-0 py-3">
+                <h5 class="mb-0"><i class="bi bi-image"></i> Yeni Slider Ekle</h5>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="Create" enctype="multipart/form-data">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Görsel Yükle <span class="text-danger">*</span></label>
+                        <input type="file" name="imageFile" class="form-control" accept="image/*" required />
+                        <div class="form-text">Ana sayfada görüntülenecek resmi seçin. (Önerilen: Yatay, 1920x600px)</div>
+                        <span asp-validation-for="ImageUrl" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Title" class="form-label fw-bold">Başlık (Opsiyonel)</label>
+                        <input asp-for="Title" class="form-control" placeholder="Örn: Yeni Yıl İndirimleri" />
+                        <div class="form-text">Görselin üzerinde görünecek büyük vurgulu metin. İstemiyorsanız boş bırakın.</div>
+                        <span asp-validation-for="Title" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Description" class="form-label fw-bold">Açıklama (Opsiyonel)</label>
+                        <textarea asp-for="Description" class="form-control" rows="2" placeholder="Örn: Tüm ofis ürünlerinde %20'ye varan indirimleri kaçırmayın!"></textarea>
+                        <div class="form-text">Başlığın altında görünecek daha küçük alt metin.</div>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="LinkUrl" class="form-label fw-bold">Yönlendirme Linki (Opsiyonel)</label>
+                        <input asp-for="LinkUrl" class="form-control" placeholder="Örn: /kategori/elektronik veya https://..." />
+                        <div class="form-text">Kullanıcı görsele tıkladığında gitmesini istediğiniz sayfanın adresini girin.</div>
+                        <span asp-validation-for="LinkUrl" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-4 p-3 bg-light rounded d-flex align-items-center justify-content-between">
+                        <div>
+                            <label class="form-check-label fw-bold" for="IsActiveSwitch">Görsel Aktif Mi?</label>
+                            <div class="form-text mb-0">Pasif yaparsanız slider ana sayfada gösterilmez ancak silinmez.</div>
+                        </div>
+                        <div class="form-check form-switch fs-4">
+                            <input class="form-check-input" type="checkbox" asp-for="IsActive" id="IsActiveSwitch" checked>
+                        </div>
+                    </div>
+
+                    <!-- Hidden fields -->
+                    <input type="hidden" asp-for="ImageUrl" value="placeholder" /> <!-- Bypass model state -->
+                    <input type="hidden" asp-for="OrderIndex" value="999" /> <!-- Default order -->
+
+                    <hr class="my-4" />
+                    
+                    <div class="d-flex justify-content-between">
+                        <a asp-action="Index" class="btn btn-light border px-4"><i class="bi bi-arrow-left"></i> Geri Dön</a>
+                        <button type="submit" class="btn btn-primary px-4"><i class="bi bi-check-lg"></i> Kaydet</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,46 @@
+@model MiniB2B.Entities.Order
+@{
+    ViewData["Title"] = "Sipariş Detayı";
+}
+
+<h2>Sipariş Detayı: @Model.OrderNumber</h2>
+<p><strong>Tarih:</strong> @Model.OrderDate.ToString("g")</p>
+<p>
+    <strong>Durum:</strong> 
+    <span class="badge @(Model.Status == MiniB2B.Entities.OrderStatus.Beklemede ? "bg-warning" : Model.Status == MiniB2B.Entities.OrderStatus.Onaylandi ? "bg-success" : "bg-danger")">
+        @Model.Status
+    </span>
+</p>
+
+<h4>Kalemler</h4>
+<table class="table table-bordered">
+    <thead class="table-light">
+        <tr>
+            <th>Ürün Kodu</th>
+            <th>Ürün Adı</th>
+            <th>Birim Fiyat</th>
+            <th>Adet</th>
+            <th>Toplam</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.OrderItems)
+        {
+            <tr>
+                <td>@item.ProductCode</td>
+                <td>@item.ProductName</td>
+                <td>@item.UnitPrice.ToString("C2")</td>
+                <td>@item.Quantity</td>
+                <td>@item.TotalPrice.ToString("C2")</td>
+            </tr>
+        }
+    </tbody>
+    <tfoot>
+        <tr>
+            <th colspan="4" class="text-end">Genel Toplam:</th>
+            <th>@Model.TotalAmount.ToString("C2")</th>
+        </tr>
+    </tfoot>
+</table>
+
+<a asp-action="Index" class="btn btn-secondary">Geri Dön</a>

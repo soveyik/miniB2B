@@ -1,0 +1,60 @@
+@model MiniB2B.Entities.Cart
+@{
+    ViewData["Title"] = "Sepetim";
+}
+
+<h2>Sepetim</h2>
+
+@if (!Model.CartItems.Any())
+{
+    <div class="alert alert-info">Sepetinizde ürün bulunmamaktadır. <a asp-controller="Home" asp-action="Index">Alışverişe devam et</a>.</div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-bordered">
+            <thead class="table-light">
+                <tr>
+                    <th>Ürün Adı</th>
+                    <th>Fiyat</th>
+                    <th>Adet</th>
+                    <th>Toplam</th>
+                    <th>İşlem</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.CartItems)
+                {
+                    <tr>
+                        <td>@item.Product.ProductName</td>
+                        <td>@item.Product.Price.ToString("C2")</td>
+                        <td>
+                            <form asp-action="Update" asp-route-id="@item.Id" method="post" class="d-flex align-items-center">
+                                <input type="number" name="quantity" value="@item.Quantity" class="form-control form-control-sm me-2" style="width: 70px;" min="1" />
+                                <button type="submit" class="btn btn-sm btn-outline-primary"><i class="bi bi-arrow-repeat"></i></button>
+                            </form>
+                        </td>
+                        <td>@((item.Product.Price * item.Quantity).ToString("C2"))</td>
+                        <td>
+                            <form asp-action="Remove" asp-route-id="@item.Id" method="post">
+                                <button type="submit" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i> Sil</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th colspan="3" class="text-end">Genel Toplam:</th>
+                    <th colspan="2">@Model.CartItems.Sum(c => c.Product.Price * c.Quantity).ToString("C2")</th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <div class="d-flex justify-content-end mt-3">
+        <form asp-action="CompleteOrder" method="post">
+            <button type="submit" class="btn btn-success btn-lg">Siparişi Tamamla</button>
+        </form>
+    </div>
+}

@@ -1,0 +1,118 @@
+@model MiniB2B.Entities.Product
+@{
+    ViewData["Title"] = Model.ProductName;
+}
+
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index">Ana Sayfa</a></li>
+            <li class="breadcrumb-item active" aria-current="page">@Model.ProductName</li>
+        </ol>
+    </nav>
+
+    <div class="card shadow-sm border-0">
+        <div class="row g-0">
+            <div class="col-md-5 d-flex align-items-center justify-content-center p-4 bg-light">
+                <img src="@Model.ImageUrl" alt="@Model.ProductName" class="img-fluid rounded shadow" style="max-height: 400px;" />
+            </div>
+            <div class="col-md-7">
+                <div class="card-body p-5">
+                    <h2 class="card-title mb-4">@Model.ProductName</h2>
+                    
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted fw-bold">Ürün Kodu</div>
+                        <div class="col-sm-8">@Model.ProductCode</div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted fw-bold">Üretici Kodu</div>
+                        <div class="col-sm-8">@(string.IsNullOrEmpty(Model.ManufacturerCode) ? "-" : Model.ManufacturerCode)</div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted fw-bold">Marka</div>
+                        <div class="col-sm-8">@Model.Brand</div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted fw-bold">Kategori</div>
+                        <div class="col-sm-8">@Model.Category?.Name</div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.SpecialCode1))
+                    {
+                        <div class="row mb-3">
+                            <div class="col-sm-4 text-muted fw-bold">Özel Kod 1</div>
+                            <div class="col-sm-8">@Model.SpecialCode1</div>
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(Model.SpecialCode2))
+                    {
+                        <div class="row mb-3">
+                            <div class="col-sm-4 text-muted fw-bold">Özel Kod 2</div>
+                            <div class="col-sm-8">@Model.SpecialCode2</div>
+                        </div>
+                    }
+
+                    <div class="row mb-4 align-items-center">
+                        <div class="col-sm-4 text-muted fw-bold">Fiyat</div>
+                        <div class="col-sm-8 text-primary fs-3 fw-bold">@Model.Price.ToString("C2")</div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-sm-4 text-muted fw-bold">Stok Durumu</div>
+                        <div class="col-sm-8">
+                            @if (Model.StockQuantity <= 0)
+                            {
+                                <span class="badge bg-danger fs-6 px-3 py-2">Tükendi</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success fs-6 px-3 py-2">@Model.StockQuantity Adet Stokta</span>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5 class="text-muted fw-bold">Ürün Açıklaması</h5>
+                        <p class="text-body mt-2" style="line-height: 1.6;">
+                            @(string.IsNullOrEmpty(Model.Description) ? "Bu ürün için açıklama bulunmamaktadır." : Model.Description)
+                        </p>
+                    </div>
+
+                    <hr class="my-4" />
+
+                    <div class="d-flex align-items-center bg-light p-3 rounded">
+                        <label for="qty" class="me-3 fw-bold">Sipariş Miktarı:</label>
+                        <input type="number" id="qty" class="form-control w-25 me-3" value="1" min="1" max="@(Model.StockQuantity > 0 ? Model.StockQuantity : 1)" @(Model.StockQuantity <= 0 ? "disabled" : "") />
+                        <button class="btn btn-primary btn-lg px-5" onclick="addToCartDetail(@Model.Id)" @(Model.StockQuantity <= 0 ? "disabled" : "")>
+                            <i class="bi bi-cart-plus me-2"></i> Sepete Ekle
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function addToCartDetail(id) {
+            var qty = $('#qty').val();
+            $.post('/Home/AddToCart', { productId: id, quantity: qty }, function(res) {
+                if(res.success) {
+                    var badge = $('#cartCountBadge');
+                    badge.text(res.cartCount);
+                    badge.show();
+                    
+                    alert('Ürün sepete başarıyla eklendi!');
+                } else {
+                    alert(res.message);
+                }
+            });
+        }
+    </script>
+}

@@ -1,0 +1,82 @@
+@model MiniB2B.Entities.Order
+@{
+    ViewData["Title"] = "Sipariş Detayı";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Sipariş Detayı: @Model.OrderNumber</h2>
+    <a asp-action="Index" class="btn btn-outline-secondary">Geri Dön</a>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Müşteri Bilgileri</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Ad Soyad:</strong> @Model.User.FirstName @Model.User.LastName</p>
+                <p><strong>E-posta:</strong> @Model.User.Email</p>
+                <p><strong>Telefon:</strong> @(Model.User.PhoneNumber ?? "-")</p>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Sipariş Durumu Güncelle</h5>
+            </div>
+            <div class="card-body">
+                <form asp-action="UpdateStatus" method="post">
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <div class="input-group">
+                        <select name="status" class="form-select">
+                            <option value="Beklemede" selected="@(Model.Status == MiniB2B.Entities.OrderStatus.Beklemede)">Beklemede</option>
+                            <option value="Onaylandi" selected="@(Model.Status == MiniB2B.Entities.OrderStatus.Onaylandi)">Onaylandı</option>
+                            <option value="Reddedildi" selected="@(Model.Status == MiniB2B.Entities.OrderStatus.Reddedildi)">Reddedildi</option>
+                        </select>
+                        <button type="submit" class="btn btn-primary">Güncelle</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Sipariş Kalemleri (Snapshot)</h5>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-striped mb-0">
+                    <thead>
+                        <tr>
+                            <th>Ürün Kodu</th>
+                            <th>Ürün Adı</th>
+                            <th>Birim Fiyat</th>
+                            <th>Adet</th>
+                            <th class="text-end">Toplam</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.OrderItems)
+                        {
+                            <tr>
+                                <td>@item.ProductCode</td>
+                                <td>@item.ProductName</td>
+                                <td>@item.UnitPrice.ToString("C2")</td>
+                                <td>@item.Quantity</td>
+                                <td class="text-end">@item.TotalPrice.ToString("C2")</td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot class="table-light">
+                        <tr>
+                            <th colspan="4" class="text-end fs-5">Genel Toplam:</th>
+                            <th class="text-end fs-5 text-primary">@Model.TotalAmount.ToString("C2")</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
