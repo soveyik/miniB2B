@@ -1,4 +1,4 @@
-@model MiniB2B.Entities.Order
+@model MiniB2B.Entities.SiparisR
 @{
     ViewData["Title"] = "Sipariş Detayı";
 }
@@ -24,7 +24,7 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model.OrderItems)
+        @foreach (var item in Model.SiparisDs)
         {
             <tr>
                 <td>@item.ProductCode</td>

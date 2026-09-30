@@ -15,21 +15,21 @@ public class OrderService
 
     public async Task<int> GetCartItemCountAsync(int userId)
     {
-        var cart = await _context.Carts.Include(c => c.CartItems).FirstOrDefaultAsync(c => c.UserId == userId);
-        return cart?.CartItems.Sum(c => c.Quantity) ?? 0;
+        var cart = await _context.SepetRs.Include(c => c.SepetDs).FirstOrDefaultAsync(c => c.UserId == userId);
+        return cart?.SepetDs.Sum(c => c.Quantity) ?? 0;
     }
 
-    public async Task<Cart> GetOrCreateCartAsync(int userId)
+    public async Task<SepetR> GetOrCreateCartAsync(int userId)
     {
-        var cart = await _context.Carts
-            .Include(c => c.CartItems)
+        var cart = await _context.SepetRs
+            .Include(c => c.SepetDs)
             .ThenInclude(ci => ci.Product)
             .FirstOrDefaultAsync(c => c.UserId == userId);
 
         if (cart == null)
         {
-            cart = new Cart { UserId = userId };
-            _context.Carts.Add(cart);
+            cart = new SepetR { UserId = userId };
+            _context.SepetRs.Add(cart);
             await _context.SaveChangesAsync();
         }
 
@@ -43,14 +43,14 @@ public class OrderService
 
         if (product == null) return false;
 
-        var existingItem = cart.CartItems.FirstOrDefault(ci => ci.ProductId == productId);
+        var existingItem = cart.SepetDs.FirstOrDefault(ci => ci.ProductId == productId);
         if (existingItem != null)
         {
             existingItem.Quantity += quantity;
         }
         else
         {
-            cart.CartItems.Add(new CartItem { ProductId = productId, Quantity = quantity });
+            cart.SepetDs.Add(new SepetD { ProductId = productId, Quantity = quantity });
         }
 
         await _context.SaveChangesAsync();
@@ -60,10 +60,10 @@ public class OrderService
     public async Task RemoveFromCartAsync(int userId, int cartItemId)
     {
         var cart = await GetOrCreateCartAsync(userId);
-        var item = cart.CartItems.FirstOrDefault(ci => ci.Id == cartItemId);
+        var item = cart.SepetDs.FirstOrDefault(ci => ci.Id == cartItemId);
         if (item != null)
         {
-            _context.CartItems.Remove(item);
+            _context.SepetDs.Remove(item);
             await _context.SaveChangesAsync();
         }
     }
@@ -71,12 +71,12 @@ public class OrderService
     public async Task UpdateCartItemQuantityAsync(int userId, int cartItemId, int quantity)
     {
         var cart = await GetOrCreateCartAsync(userId);
-        var item = cart.CartItems.FirstOrDefault(ci => ci.Id == cartItemId);
+        var item = cart.SepetDs.FirstOrDefault(ci => ci.Id == cartItemId);
         if (item != null)
         {
             if (quantity <= 0)
             {
-                _context.CartItems.Remove(item);
+                _context.SepetDs.Remove(item);
             }
             else
             {
@@ -88,12 +88,12 @@ public class OrderService
 
     public async Task<(bool Success, string Message)> CompleteOrderAsync(int userId)
     {
-        var cart = await _context.Carts
-            .Include(c => c.CartItems)
+        var cart = await _context.SepetRs
+            .Include(c => c.SepetDs)
             .ThenInclude(ci => ci.Product)
             .FirstOrDefaultAsync(c => c.UserId == userId);
 
-        if (cart == null || !cart.CartItems.Any())
+        if (cart == null || !cart.SepetDs.Any())
         {
             return (false, "Sepetiniz boş.");
         }
@@ -101,7 +101,7 @@ public class OrderService
         using var transaction = await _context.Database.BeginTransactionAsync();
         try
         {
-            var order = new Order
+            var order = new SiparisR
             {
                 UserId = userId,
                 OrderNumber = "ORD-" + DateTime.Now.Year + "-" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper(),
@@ -110,7 +110,7 @@ public class OrderService
                 TotalAmount = 0
             };
 
-            foreach (var item in cart.CartItems)
+            foreach (var item in cart.SepetDs)
             {
                 var product = item.Product;
                 if (product.StockQuantity < item.Quantity)
@@ -122,7 +122,7 @@ public class OrderService
                 // Stok düş
                 product.StockQuantity -= item.Quantity;
 
-                var orderItem = new OrderItem
+                var orderItem = new SiparisD
                 {
                     ProductId = product.Id,
                     ProductCode = product.ProductCode,
@@ -132,12 +132,12 @@ public class OrderService
                     TotalPrice = product.Price * item.Quantity
                 };
 
-                order.OrderItems.Add(orderItem);
+                order.SiparisDs.Add(orderItem);
                 order.TotalAmount += orderItem.TotalPrice;
             }
 
-            _context.Orders.Add(order);
-            _context.CartItems.RemoveRange(cart.CartItems); // Sepeti boşalt
+            _context.SiparisRs.Add(order);
+            _context.SepetDs.RemoveRange(cart.SepetDs); // Sepeti boşalt
             
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
@@ -151,9 +151,9 @@ public class OrderService
         }
     }
 
-    public async Task<List<Order>> GetOrdersAsync(int? userId = null)
+    public async Task<List<SiparisR>> GetOrdersAsync(int? userId = null)
     {
-        var query = _context.Orders.Include(o => o.User).AsQueryable();
+        var query = _context.SiparisRs.Include(o => o.User).AsQueryable();
         if (userId.HasValue)
         {
             query = query.Where(o => o.UserId == userId.Value);
@@ -161,17 +161,17 @@ public class OrderService
         return await query.OrderByDescending(o => o.OrderDate).ToListAsync();
     }
 
-    public async Task<Order?> GetOrderDetailsAsync(int orderId)
+    public async Task<SiparisR?> GetOrderDetailsAsync(int orderId)
     {
-        return await _context.Orders
-            .Include(o => o.OrderItems)
+        return await _context.SiparisRs
+            .Include(o => o.SiparisDs)
             .Include(o => o.User)
             .FirstOrDefaultAsync(o => o.Id == orderId);
     }
     
     public async Task UpdateOrderStatusAsync(int orderId, OrderStatus status)
     {
-        var order = await _context.Orders.FindAsync(orderId);
+        var order = await _context.SiparisRs.FindAsync(orderId);
         if (order != null)
         {
             order.Status = status;

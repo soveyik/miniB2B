@@ -1,6 +1,6 @@
 namespace MiniB2B.Entities;
 
-public class Order
+public class SiparisR
 {
     public int Id { get; set; }
     public string OrderNumber { get; set; } = null!;
@@ -10,5 +10,5 @@ public class Order
     public OrderStatus Status { get; set; } = OrderStatus.Beklemede;
 
     public User User { get; set; } = null!;
-    public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
+    public ICollection<SiparisD> SiparisDs { get; set; } = new List<SiparisD>();
 }

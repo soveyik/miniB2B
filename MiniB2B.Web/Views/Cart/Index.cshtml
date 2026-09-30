@@ -1,11 +1,11 @@
-@model MiniB2B.Entities.Cart
+@model MiniB2B.Entities.SepetR
 @{
     ViewData["Title"] = "Sepetim";
 }
 
 <h2>Sepetim</h2>
 
-@if (!Model.CartItems.Any())
+@if (!Model.SepetDs.Any())
 {
     <div class="alert alert-info">Sepetinizde ürün bulunmamaktadır. <a asp-controller="Home" asp-action="Index">Alışverişe devam et</a>.</div>
 }
@@ -23,7 +23,7 @@ else
                 </tr>
             </thead>
             <tbody>
-                @foreach (var item in Model.CartItems)
+                @foreach (var item in Model.SepetDs)
                 {
                     <tr>
                         <td>@item.Product.ProductName</td>
@@ -46,7 +46,7 @@ else
             <tfoot>
                 <tr>
                     <th colspan="3" class="text-end">Genel Toplam:</th>
-                    <th colspan="2">@Model.CartItems.Sum(c => c.Product.Price * c.Quantity).ToString("C2")</th>
+                    <th colspan="2">@Model.SepetDs.Sum(c => c.Product.Price * c.Quantity).ToString("C2")</th>
                 </tr>
             </tfoot>
         </table>

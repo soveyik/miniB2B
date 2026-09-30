@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MiniB2B.DataAccess;
 
@@ -11,9 +12,11 @@ using MiniB2B.DataAccess;
 namespace MiniB2B.DataAccess.Migrations
 {
     [DbContext(typeof(MiniB2BContext))]
-    partial class MiniB2BContextModelSnapshot : ModelSnapshot
+    [Migration("20260930074633_RenameCartAndOrderToSepetAndSiparis")]
+    partial class RenameCartAndOrderToSepetAndSiparis
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

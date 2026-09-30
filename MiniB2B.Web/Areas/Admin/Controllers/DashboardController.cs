@@ -18,7 +18,7 @@ public class DashboardController : Controller
 
     public async Task<IActionResult> Index()
     {
-        ViewBag.TotalOrders = await _context.Orders.CountAsync();
+        ViewBag.TotalOrders = await _context.SiparisRs.CountAsync();
         ViewBag.TotalProducts = await _context.Products.CountAsync();
         ViewBag.TotalUsers = await _context.Users.CountAsync();
 
